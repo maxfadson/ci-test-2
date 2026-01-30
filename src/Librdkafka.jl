@@ -6,7 +6,7 @@ using Dates
 using Base64
 using librdkafka_jll
 using CyrusSASL_jll
-using Downloads
+using EasyCurl
 
 # Auto-download wrapper from GitHub releases or use local build
 const libkafka = let
@@ -38,11 +38,18 @@ const libkafka = let
             url = "https://github.com/maxfadson/Librdkafka.jl/releases/download/v$version/$platform-julia$julia_version.tar.gz"
             @info "Downloading binary from $url"
 
-            temp_file = Downloads.download(url)
-            run(`tar -xzf $temp_file -C $lib_dir`)
-            rm(temp_file, force=true)
+            response = http_request("GET", url; read_timeout=30, connect_timeout=10)
+
+            if http_status(response) == 200
+                temp_file = tempname()
+                write(temp_file, http_body(response))
+                run(`tar -xzf $temp_file -C $lib_dir`)
+                rm(temp_file, force=true)
+            else
+                @warn "Failed to download binary for Julia $julia_version" status=http_status(response)
+            end
         catch e
-            @warn "Failed to download binary for Julia $julia_version" exception=e
+            @warn "Failed to download binary for Julia $julia_version" exception=(e, catch_backtrace())
         end
     end
 
