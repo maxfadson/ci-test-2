@@ -48,7 +48,7 @@ const libkafka = let
                 rm(temp_file, force=true)
                 @info "Successfully downloaded and extracted pre-built binary"
             else
-                @warn "Pre-built binary not found (HTTP $(http_status(response)))" version=$version platform=$platform julia=$julia_version
+                @warn "Pre-built binary not found" status=http_status(response) version=version platform=platform julia=julia_version
             end
         catch e
             @warn "Failed to download binary" exception=(e, catch_backtrace())
