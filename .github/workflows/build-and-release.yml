@@ -24,15 +24,14 @@ jobs:
             arch: x64
             platform: linux-x86_64
             lib_ext: so
-          # macOS and Windows builds disabled for private repo
           # - os: macos-15-intel
           #   arch: x64
           #   platform: macos-x86_64
           #   lib_ext: dylib
-          # - os: macos-15
-          #   arch: arm64
-          #   platform: macos-aarch64
-          #   lib_ext: dylib
+          - os: macos-15
+            arch: arm64
+            platform: macos-aarch64
+            lib_ext: dylib
           # - os: windows-2022
           #   arch: x64
           #   platform: windows-x86_64
