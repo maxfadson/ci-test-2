@@ -34,8 +34,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
-      - name: Resolve Julia dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.resolve()'
+      - name: Install Julia dependencies (without precompile)
+        env:
+          JULIA_PKG_PRECOMPILE_AUTO: 0
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
       - name: Build C++ wrapper
         run: |
