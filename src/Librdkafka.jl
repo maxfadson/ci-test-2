@@ -36,7 +36,6 @@ const libkafka = let
             version = match(r"version\s*=\s*\"([^\"]+)\"", project_toml)[1]
 
             url = "https://github.com/maxfadson/Librdkafka.jl/releases/download/v$version/$platform-julia$julia_version.tar.gz"
-            @info "Downloading binary from $url"
 
             response = http_request("GET", url; read_timeout=30, connect_timeout=10)
 
@@ -45,11 +44,9 @@ const libkafka = let
                 write(temp_file, http_body(response))
                 run(`tar -xzf $temp_file -C $lib_dir`)
                 rm(temp_file, force=true)
-            else
-                @warn "Failed to download binary for Julia $julia_version" status=http_status(response)
             end
-        catch e
-            @warn "Failed to download binary for Julia $julia_version" exception=(e, catch_backtrace())
+        catch
+            # Silently ignore download failures (release may not exist yet)
         end
     end
 
