@@ -34,14 +34,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
-      - name: Install dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
-
-      - name: Build C++ wrapper
+      - name: Build C++ wrapper (before Julia deps to avoid precompile issues)
         run: |
           cd src
           cmake -S . -B build
           cmake --build build
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
       - name: Verify build artifacts
         run: |
