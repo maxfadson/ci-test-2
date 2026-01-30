@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(STATIC_DEPENDENCY_LINKING "Link external dependencies statically to avoid runtime shared library requirements" ON)
+option(STATIC_DEPENDENCY_LINKING "Link external dependencies statically to avoid runtime shared library requirements" OFF)
 
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 

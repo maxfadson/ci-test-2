@@ -12,18 +12,20 @@ on:
 
 jobs:
   test:
-    name: Julia ${{ matrix.julia-version }} - Linux x64
-    runs-on: ubuntu-22.04
+    name: Test ${{ matrix.os }} Julia ${{ matrix.julia-version }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-22.04]
+        # os: [ubuntu-22.04, macos-15, macos-15-intel, windows-2022]
         julia-version: ['1.10']
+        # julia-version: ['1.10', '1.11', '1.12']
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Julia
-        uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
 
@@ -32,7 +34,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
-      - name: Install Julia dependencies
+      - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
       - name: Build C++ wrapper
