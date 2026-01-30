@@ -1,7 +1,0 @@
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/kafka.dir
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/edit_cache.dir
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/rebuild_cache.dir
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/list_install_components.dir
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/install.dir
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/install/local.dir
-/home/bhft/proj/Librdkafka.jl/build/CMakeFiles/install/strip.dir

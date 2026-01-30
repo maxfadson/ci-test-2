@@ -6,22 +6,66 @@ using Dates
 using Base64
 using librdkafka_jll
 using CyrusSASL_jll
+using Downloads
 
-const _libkafka_name = "libkafka.$(Libdl.dlext)"
-const _libkafka_candidates = (
-    joinpath(@__DIR__, "build", "lib"),
-    joinpath(@__DIR__, "..", "build", "lib"),
-    joinpath(@__DIR__, "..", "src", "build", "lib"),
-)
+# Auto-download wrapper from GitHub releases or use local build
+const libkafka = let
+    pkg_dir = dirname(@__DIR__)
+    lib_dir = joinpath(pkg_dir, "lib")
+    lib_name = Sys.iswindows() ? "libkafka.dll" :
+               Sys.isapple() ? "libkafka.dylib" : "libkafka.so"
+    lib_path = joinpath(lib_dir, lib_name)
 
-function _locate_libkafka()
-    for dir in _libkafka_candidates
-        path = normpath(joinpath(dir, _libkafka_name))
-        if isfile(path)
-            return path
+    # If not in lib/, try to download from GitHub release
+    if !isfile(lib_path)
+        platform = if Sys.islinux()
+            "linux-x86_64"
+        elseif Sys.isapple()
+            Sys.ARCH === :aarch64 ? "macos-aarch64" : "macos-x86_64"
+        elseif Sys.iswindows()
+            "windows-x86_64"
+        end
+
+        # Detect Julia minor version (1.10, 1.11, etc)
+        julia_version = "$(VERSION.major).$(VERSION.minor)"
+
+        try
+            mkpath(lib_dir)
+            # Get version from Project.toml
+            project_toml = read(joinpath(pkg_dir, "Project.toml"), String)
+            version = match(r"version\s*=\s*\"([^\"]+)\"", project_toml)[1]
+
+            url = "https://github.com/maxfadson/Librdkafka.jl/releases/download/v$version/$platform-julia$julia_version.tar.gz"
+            @info "Downloading binary from $url"
+
+            temp_file = Downloads.download(url)
+            run(`tar -xzf $temp_file -C $lib_dir`)
+            rm(temp_file, force=true)
+        catch e
+            @warn "Failed to download binary for Julia $julia_version" exception=e
         end
     end
-    error("Could not locate $(_libkafka_name). Run `cmake -S src -B src/build && cmake --build src/build` first.")
+
+    # Fallback to local build directories
+    if !isfile(lib_path)
+        candidates = (
+            joinpath(@__DIR__, "build", "lib", lib_name),
+            joinpath(pkg_dir, "build", "lib", lib_name),
+            joinpath(pkg_dir, "src", "build", "lib", lib_name),
+        )
+        for path in candidates
+            if isfile(path)
+                lib_path = path
+                break
+            end
+        end
+    end
+
+    if !isfile(lib_path)
+        error("Could not locate $lib_name. Run `cmake -S src -B src/build && cmake --build src/build` first.")
+    end
+
+    lib_path
 end
 
 const _dlopen_handles = Ref{Vector{Ptr{Nothing}}}(Ptr{Nothing}[])
@@ -44,8 +88,8 @@ end
 
 module NativeBindings
 using CxxWrap
-import .._locate_libkafka
-@wrapmodule(_locate_libkafka)
+import ..libkafka
+@wrapmodule(() -> libkafka)
 function __init__()
     @initcxx
 end

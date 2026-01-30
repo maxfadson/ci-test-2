@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }} - Linux x64
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version: ['1.10']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Build C++ wrapper
+        run: |
+          cd src
+          cmake -S . -B build
+          cmake --build build
+
+      - name: Verify build artifacts
+        run: |
+          ls -lh src/build/lib/
+          file src/build/lib/libkafka.so
+
+      # TODO: Add Julia tests when test/runtests.jl is created
+      # - name: Run tests
+      #   run: julia --project=. -e 'using Pkg; Pkg.test()'
