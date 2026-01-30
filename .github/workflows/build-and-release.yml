@@ -51,8 +51,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
-      - name: Install CxxWrap for CMake
-        run: julia --project=. -e 'using Pkg; Pkg.add("CxxWrap"); using CxxWrap'
+      - name: Resolve Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.resolve()'
 
       - name: Build C++ wrapper
         run: |
@@ -60,8 +60,8 @@ jobs:
           cmake -S . -B build
           cmake --build build
 
-      - name: Install Julia dependencies and precompile
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      - name: Precompile all packages
+        run: julia --project=. -e 'using Pkg; Pkg.precompile()'
 
       - name: Package artifact
         shell: bash
