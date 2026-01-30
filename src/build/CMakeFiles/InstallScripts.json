@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/bhft/proj/Librdkafka.jl/src/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
